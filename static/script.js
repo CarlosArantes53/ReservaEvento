@@ -11,6 +11,30 @@ socket.on('atualizar_eventos', (events) => {
 });
 
 
+function atualizarUsuariosOnline(userList) {
+    const lista = document.getElementById('queue-list');
+    lista.innerHTML = ''; // Limpa a lista
+
+    userList.forEach(userId => {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.textContent = `Session_${userId}`;
+        lista.appendChild(li);
+    });
+}
+
+// Recebe a lista de usuários online e atualiza a lista no frontend
+socket.on('atualizar_usuarios_online', function (usuariosOnline) {
+    atualizarUsuariosOnline(usuariosOnline);
+});
+
+// Captura o ID do usuário logado via Socket.IO
+socket.on('user_id', function (data) {
+    const userId = data.user_id;
+    console.log('ID do usuário logado:', userId);
+});
+
+
 let reservaTemporaria = null;
 let tempoRestante = 600; // 10 minutos em segundos
 let timerInterval = null;
@@ -26,13 +50,14 @@ function atualizarEventos(events) {
         card.className = 'card mb-3'; // Adiciona a classe Bootstrap 'card' e 'mb-3' para margem inferior
         card.style.maxWidth = '540px'; // Estilo extra para limitar a largura
 
-        card.innerHTML = `
+        card.innerHTML =
             <div class="card-body">
                 <h5 class="card-title">${evento}</h5> <!-- Classe 'card-title' para o título -->
                 <p class="card-text">Vagas disponíveis: ${info.vagas}</p> <!-- Classe 'card-text' para o texto -->
-                <button class="btn btn-primary reservarBtn">Reservar</button> <!-- Classe 'btn btn-primary' para o botão -->
+                <button class="btn btn-primary reservarBtn">Reservar</button>
+                <!-- Classe 'btn btn-primary' para o botão -->
             </div>
-        `;
+        ;
         eventList.appendChild(card);
 
         // Adiciona o ouvinte de evento para o botão de reserva
@@ -108,6 +133,7 @@ function reservarTemporario(evento) {
         alert("Reserva cancelada.");
     };
 }
+
 // Função para adicionar um item na lista de espera
 function adicionarNaFila(userId, tempoEspera) {
     const lista = document.getElementById('queue-list');
@@ -117,17 +143,17 @@ function adicionarNaFila(userId, tempoEspera) {
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
 
     // Adiciona o ID do usuário e o tempo de espera
-    li.innerHTML = `
+    li.innerHTML =
         <span>Session_${userId}</span>
-        <span class="badge bg-warning">${tempoEspera}s</span>
-    `;
+    <span class="badge bg-warning">${tempoEspera}s</span>
+    ;
 
     // Adiciona o item na lista
     lista.appendChild(li);
 }
 
 // Captura o ID do usuário logado via Socket.IO
-socket.on('user_id', function(data) {
+socket.on('user_id', function (data) {
     const userId = data.user_id;
     console.log('ID do usuário logado:', userId);
 
@@ -138,8 +164,6 @@ socket.on('user_id', function(data) {
 // // Exemplo de adicionar outros usuários na fila
 // adicionarNaFila('7h3k3m', 23);
 // adicionarNaFila('6st8u', 30);
-
-
 
 
 // Recebe a atualização dos eventos em tempo real

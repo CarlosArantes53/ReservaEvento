@@ -58,8 +58,6 @@ def get_eventos():
         return jsonify(events)
 
 
-
-
 @app.route('/api/user_id', methods=['GET'])
 def get_user_id():
     # Retorna o ID do usuário logado (session ID)
@@ -80,7 +78,6 @@ def conectar():
     emitir_atualizacao_usuarios_online()
 
 
-
 @socketio.on('disconnect')
 def desconectar():
     # Remove o ID da sessão ao desconectar
@@ -91,14 +88,14 @@ def desconectar():
 
 
 def emitir_atualizacao_usuarios_online():
-    # Emite a quantidade de usuários conectados
-    socketio.emit('atualizar_usuarios_online', len(usuarios_online))
+    # Emite a lista de usuários conectados para todos os clientes
+    socketio.emit('atualizar_usuarios_online', list(usuarios_online))
 
 
 # Função que roda a cada 5 segundos para verificar e emitir a atualização
 def check_user_activity():
     while True:
-        time.sleep(5)  # Espera 5 segundos
+        time.sleep(1)  # Espera 5 segundos
         emitir_atualizacao_usuarios_online()  # Emite o número de usuários conectados
 
 
@@ -109,10 +106,6 @@ def start_periodic_check():
     thread.start()
 
 
-# Inicia a verificação periódica quando o servidor for iniciado
-if __name__ == '__main__':
-    start_periodic_check()
-    socketio.run(app, debug=True)
 
 
 @socketio.on('entrar_fila')
@@ -180,6 +173,12 @@ def emitir_atualizacao_eventos():
 
 def emitir_atualizacao_fila():
     socketio.emit('atualizar_fila', list(fila_espera))
+
+
+# Inicia a verificação periódica quando o servidor for iniciado
+# if __name__ == '__main__':
+#     start_periodic_check()
+#     socketio.run(app, debug=True)
 
 
 if __name__ == '__main__':
