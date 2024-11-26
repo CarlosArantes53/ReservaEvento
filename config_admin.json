@@ -1,19 +1,19 @@
 {
     "events": {
-        "teste": {
+        "Workshop de Inteligência Artificial": {
             "vagas": 4
         },
-        "vamo": {
-            "vagas": 3
-        },
-        "teste2": {
-            "vagas": 77777
-        },
-        "fasoft": {
+        "Hackathon de Inovação Tecnológica": {
             "vagas": 7
         },
-        "hdhdhdhdh": {
-            "vagas": 8888
+        "Seminário de Cibersegurança Avançada": {
+            "vagas": 0
+        },
+        "Conferência de Tecnologias Emergente": {
+            "vagas": 3
+        },
+        "Entendendo JAVA": {
+            "vagas": 5
         }
     },
     "max_interacoes": 5

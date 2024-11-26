@@ -5,57 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Reservas</title>
     <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
 </head>
-<body>
-    <h1>Sistema de Reservas</h1>
-    <div id="events">
-    <h2>Eventos Disponíveis</h2>
-        <div id="event-list">
+<body class="bg-light">
+
+<div class="container py-4">
+    <h1 class="text-center mb-5">Sistema de Reservas</h1>
+
+    <div class="col-12 mb-4">
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <h1>Usuários Conectados: <span id="user-count">0</span></h1>
+                <div id="loading" style="display:none;">Carregando...</div>
+                <div class="text-success p-2 rounded mb-3">
+                    Status do Sistema: Limite de usuários simultâneos: 0
+                </div>
+                <div class="text-danger p-2 rounded">
+                    Slots disponíveis: 0
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="fila">
-        <h2>Fila de Espera</h2>
-        <ul id="queue-list">
-        </ul>
+
+    <div class="row mb-4">
+
+
+        <div class="col-12">
+            <div class="row">
+
+                <!-- Eventos Disponíveis -->
+                <div class="col-12 col-md-6 mb-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h2 class="card-title">Eventos Disponíveis</h2>
+                            <div id="event-list" class="row g-3">
+                                <!-- Cards de eventos serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-md-6 mb-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h2 class="card-title">Fila de Espera</h2>
+                            <ul id="queue-list" class="list-group">
+
+
+
+                                <!--?                                <li class="list-group-item d-flex justify-content-between">-->
+                                <!--?                                    <span>Session_[ID_USUARIO_LOGADO]</span>-->
+                                <!--?                                    <span class="badge bg-warning">19s</span>-->
+                                <!--?                                </li>-->
+                                <!--?                                <li class="list-group-item d-flex justify-content-between">-->
+                                <!--?                                    <span>Session_7h3k3m</span>-->
+                                <!--?                                    <span class="badge bg-info">23s</span>-->
+                                <!--?                                </li>-->
+                                <!--?                                <li class="list-group-item d-flex justify-content-between">-->
+                                <!--?                                    <span>Session_6st8u</span>-->
+                                <!--?                                    <span class="badge bg-success">30s</span>-->
+                                <!--?                                </li>-->
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
     </div>
 
-    <script>
-        const socket = io();
-    
-        fetch('/api/eventos')
-            .then(response => response.json())
-            .then(events => {
-                atualizarEventos(events);
-            });
-    
-        socket.on('atualizar_eventos', (events) => {
-            atualizarEventos(events);
-        });
-    
-        function atualizarEventos(events) {
-            const eventList = document.getElementById('event-list');
-            eventList.innerHTML = '';
-            for (const [evento, info] of Object.entries(events)) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <h3>${evento}</h3>
-                    <p>Vagas disponíveis: ${info.vagas}</p>
-                    <button onclick="reservar('${evento}')">Reservar</button>
-                `;
-                eventList.appendChild(card);
-            }
-        }
-    
-        function reservar(evento) {
-            const userId = prompt("Digite seu ID de usuário:");
-            if (userId) {
-                socket.emit('reservar', { user_id: userId, evento });
-            }
-        }
-    </script>
-    
+    <div id="modal" style="display:none;">
+        <div id="modal-content">
+            <h3>Reservar</h3>
+            <form id="reservaForm">
+                <input type="text" id="userName" placeholder="Nome" required/>
+                <input type="text" id="userPhone" placeholder="Telefone" required/>
+                <div id="timer">Tempo restante: 2:00</div>
+                <button class="btn btn-primary " type="submit" id="confirmarBtn">Confirmar</button>
+                <button class="btn btn-info " type="button" id="cancelarBtn">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+
+</div>
+
+<script src="../static/script.js"></script>
 </body>
 </html>
