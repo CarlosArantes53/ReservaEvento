@@ -1,0 +1,20 @@
+{
+    "events": {
+        "teste": {
+            "vagas": 4
+        },
+        "vamo": {
+            "vagas": 3
+        },
+        "teste2": {
+            "vagas": 77777
+        },
+        "fasoft": {
+            "vagas": 7
+        },
+        "hdhdhdhdh": {
+            "vagas": 8888
+        }
+    },
+    "max_interacoes": 5
+}

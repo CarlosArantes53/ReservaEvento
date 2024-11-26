@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sistema de Reservas</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <h1>Painel do Administrador</h1>
+    <form id="config-form">
+        <h2>Configurar Eventos</h2>
+        <div id="event-configs">
+        </div>
+        <button type="button" onclick="addEvent()">Adicionar Evento</button>
+        <h2>Configuração Geral</h2>
+        <label>
+            Máximo de Usuários Simultâneos:
+            <input type="number" id="max_interacoes" required>
+        </label>
+        <button type="submit">Salvar Configurações</button>
+    </form>
+
+    <script>
+        const configUrl = "/admin/salvar";
+
+        fetch(configUrl.replace('/salvar', ''))
+            .then((response) => response.json())
+            .then((data) => {
+                const eventConfigs = document.getElementById('event-configs');
+                const maxInteracoesInput = document.getElementById('max_interacoes');
+
+                for (const [evento, info] of Object.entries(data.events)) {
+                    renderEventInput(eventConfigs, evento, info.vagas);
+                }
+
+                maxInteracoesInput.value = data.max_interacoes;
+            });
+
+        function addEvent() {
+            const eventConfigs = document.getElementById('event-configs');
+            renderEventInput(eventConfigs, '', '');
+        }
+
+        function renderEventInput(container, nome, vagas) {
+            const div = document.createElement('div');
+            div.className = 'event-config';
+            div.innerHTML = `
+                <label>
+                    Nome do Evento:
+                    <input type="text" class="event-name" value="${nome}" required>
+                </label>
+                <label>
+                    Vagas:
+                    <input type="number" class="event-vagas" value="${vagas}" required>
+                </label>
+                <button type="button" onclick="this.parentElement.remove()">Remover</button>
+            `;
+            container.appendChild(div);
+        }
+
+        document.getElementById('config-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const events = {};
+            document.querySelectorAll('.event-config').forEach((config) => {
+                const nome = config.querySelector('.event-name').value;
+                const vagas = parseInt(config.querySelector('.event-vagas').value, 10);
+                if (nome && vagas) {
+                    events[nome] = { vagas };
+                }
+            });
+
+            const maxInteracoes = parseInt(document.getElementById('max_interacoes').value, 10);
+
+            const configData = { events, max_interacoes: maxInteracoes };
+
+            fetch(configUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(configData),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+        alert(data.status);
+        socket.emit('atualizar_eventos', configData.events);
+    });
+        });
+    </script>
+</body>
+</html>

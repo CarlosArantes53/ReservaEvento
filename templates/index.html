@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Sistema de Reservas</h1>
+    <div id="events">
+    <h2>Eventos Disponíveis</h2>
+        <div id="event-list">
+        </div>
+    </div>
+
+    <div id="fila">
+        <h2>Fila de Espera</h2>
+        <ul id="queue-list">
+        </ul>
+    </div>
+
+    <script>
+        const socket = io();
+    
+        fetch('/api/eventos')
+            .then(response => response.json())
+            .then(events => {
+                atualizarEventos(events);
+            });
+    
+        socket.on('atualizar_eventos', (events) => {
+            atualizarEventos(events);
+        });
+    
+        function atualizarEventos(events) {
+            const eventList = document.getElementById('event-list');
+            eventList.innerHTML = '';
+            for (const [evento, info] of Object.entries(events)) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${evento}</h3>
+                    <p>Vagas disponíveis: ${info.vagas}</p>
+                    <button onclick="reservar('${evento}')">Reservar</button>
+                `;
+                eventList.appendChild(card);
+            }
+        }
+    
+        function reservar(evento) {
+            const userId = prompt("Digite seu ID de usuário:");
+            if (userId) {
+                socket.emit('reservar', { user_id: userId, evento });
+            }
+        }
+    </script>
+    
+</body>
+</html>
