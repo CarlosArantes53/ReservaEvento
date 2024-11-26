@@ -3,6 +3,7 @@ const socket = io();
 fetch('/api/eventos')
     .then(response => response.json())
     .then(events => {
+        console.log("results", events)
         atualizarEventos(events);
     });
 
@@ -50,14 +51,15 @@ function atualizarEventos(events) {
         card.className = 'card mb-3'; // Adiciona a classe Bootstrap 'card' e 'mb-3' para margem inferior
         card.style.maxWidth = '540px'; // Estilo extra para limitar a largura
 
-        card.innerHTML =
+        card.innerHTML = `
             <div class="card-body">
                 <h5 class="card-title">${evento}</h5> <!-- Classe 'card-title' para o título -->
                 <p class="card-text">Vagas disponíveis: ${info.vagas}</p> <!-- Classe 'card-text' para o texto -->
                 <button class="btn btn-primary reservarBtn">Reservar</button>
                 <!-- Classe 'btn btn-primary' para o botão -->
             </div>
-        ;
+        `;
+
         eventList.appendChild(card);
 
         // Adiciona o ouvinte de evento para o botão de reserva
@@ -67,6 +69,7 @@ function atualizarEventos(events) {
         });
     }
 }
+
 
 function reservarTemporario(evento) {
     // Verifica se já existe uma reserva temporária ativa
@@ -144,9 +147,9 @@ function adicionarNaFila(userId, tempoEspera) {
 
     // Adiciona o ID do usuário e o tempo de espera
     li.innerHTML =
-        <span>Session_${userId}</span>
+        `<span>Session_${userId}</span>
     <span class="badge bg-warning">${tempoEspera}s</span>
-    ;
+    `;
 
     // Adiciona o item na lista
     lista.appendChild(li);
@@ -172,15 +175,16 @@ socket.on('atualizar_eventos', (events) => {
 });
 
 // Atualiza a lista de usuários conectados
-socket.on('atualizar_usuarios_online', (userCount) => {
-    document.getElementById('user-count').innerText = userCount;
-});
+// socket.on('atualizar_usuarios_online', (userCount) => {
+//     document.getElementById('user-count').innerText = userCount;
+// });
 
 
 // Ouve a atualização de usuários online
 socket.on('atualizar_usuarios_online', function (userCount) {
     // Atualiza o contador de usuários no frontend
-    document.getElementById('user-count').innerText = userCount;
+    const count = userCount.length
+    document.getElementById('user-count').innerText = count;
     document.getElementById('loading').style.display = 'none';  // Oculta o "loading" após a atualização
 });
 

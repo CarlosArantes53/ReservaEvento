@@ -176,9 +176,9 @@ def emitir_atualizacao_fila():
 
 
 # Inicia a verificação periódica quando o servidor for iniciado
-# if __name__ == '__main__':
-#     start_periodic_check()
-#     socketio.run(app, debug=True)
+if __name__ == '__main__':
+    start_periodic_check()
+    socketio.run(app, debug=True)
 
 
 if __name__ == '__main__':
