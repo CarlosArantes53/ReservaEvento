@@ -14,7 +14,7 @@ socket.on('atualizar_eventos', (events) => {
 
 function atualizarUsuariosOnline(userList) {
     const lista = document.getElementById('queue-list');
-    lista.innerHTML = ''; // Limpa a lista
+    lista.innerHTML = '';
 
     userList.forEach(userId => {
         const li = document.createElement('li');
@@ -24,32 +24,40 @@ function atualizarUsuariosOnline(userList) {
     });
 }
 
-// Recebe a lista de usuários online e atualiza a lista no frontend
 socket.on('atualizar_usuarios_online', function (usuariosOnline) {
     atualizarUsuariosOnline(usuariosOnline);
 });
 
-// Captura o ID do usuário logado via Socket.IO
 socket.on('user_id', function (data) {
     const userId = data.user_id;
     console.log('ID do usuário logado:', userId);
 });
 
+socket.on('interacao_liberada', function (data) {
+    const userId = data.user_id;
+    if (userId === userId) {
+        alert("Sua interação foi liberada! Você pode interagir com os eventos agora.");
+    }
+});
+
+socket.on('tempo_excedido', function (data) {
+    const userId = data.user_id;
+    if (userId === userId) {
+        alert("Seu tempo para escolha expirou. Você foi movido para o final da fila.");
+    }
+});
 
 let reservaTemporaria = null;
-let tempoRestante = 600; // 10 minutos em segundos
+let tempoRestante = 600;
 let timerInterval = null;
-
 
 function atualizarEventos(events) {
     const eventList = document.getElementById('event-list');
-    eventList.innerHTML = ''; // Limpa a lista de eventos
-
+    eventList.innerHTML = ''; 
     for (const [evento, info] of Object.entries(events)) {
-        // Cria um card com as classes do Bootstrap
         const card = document.createElement('div');
-        card.className = 'card mb-3'; // Adiciona a classe Bootstrap 'card' e 'mb-3' para margem inferior
-        card.style.maxWidth = '540px'; // Estilo extra para limitar a largura
+        card.className = 'card mb-3';
+        card.style.maxWidth = '540px';
 
         card.innerHTML = `
             <div class="card-body">
@@ -62,7 +70,6 @@ function atualizarEventos(events) {
 
         eventList.appendChild(card);
 
-        // Adiciona o ouvinte de evento para o botão de reserva
         const reservarBtn = card.querySelector('.reservarBtn');
         reservarBtn.addEventListener('click', function () {
             reservarTemporario(evento);
@@ -70,45 +77,38 @@ function atualizarEventos(events) {
     }
 }
 
-
 function reservarTemporario(evento) {
-    // Verifica se já existe uma reserva temporária ativa
     if (reservaTemporaria) {
         alert("Você já tem uma reserva temporária em andamento.");
         return;
     }
 
     reservaTemporaria = {evento};
-    // Inicia o timer de 10 minutos
     tempoRestante = 120;
     atualizarTimer();
 
     const modal = document.getElementById('modal');
     modal.style.display = 'flex';
 
-    // Start timer
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(atualizarTimer, 2000);
 
-    // Função que atualiza o contador de tempo
     function atualizarTimer() {
         const minutos = Math.floor(tempoRestante / 60);
         const segundos = tempoRestante % 60;
         document.getElementById('timer').innerText = `Tempo restante: ${minutos}:${segundos < 2 ? '0' : ''}${segundos}`;
 
-        // Se o tempo expirar, libera a vaga
         if (tempoRestante <= 0) {
             clearInterval(timerInterval);
-            reservaTemporaria = null; // Libera a vaga
+            reservaTemporaria = null;
             socket.emit('liberar_vaga', {evento});
-            modal.style.display = 'none'; // Fecha o modal
+            modal.style.display = 'none';
             alert("O tempo para confirmação expirou. A vaga foi liberada.");
         } else {
             tempoRestante--;
         }
     }
 
-    // Função de confirmação
     document.getElementById('reservaForm').onsubmit = function (event) {
         event.preventDefault();
 
@@ -116,60 +116,46 @@ function reservarTemporario(evento) {
         const userPhone = document.getElementById('userPhone').value;
 
         if (userName && userPhone) {
-            // Envia a reserva confirmada
             socket.emit('confirmar_reserva', {userName, userPhone, evento});
-            reservaTemporaria = null; // Desativa a reserva temporária
-            clearInterval(timerInterval); // Para o timer
-            modal.style.display = 'none'; // Fecha o modal
+            reservaTemporaria = null;
+            clearInterval(timerInterval);
+            modal.style.display = 'none';
             alert("Reserva confirmada com sucesso!");
         } else {
             alert("Por favor, preencha seu nome e telefone.");
         }
     };
 
-    // Função para cancelar a reserva temporária
     document.getElementById('cancelarBtn').onclick = function () {
-        clearInterval(timerInterval); // Para o timer
-        reservaTemporaria = null; // Libera a vaga
+        clearInterval(timerInterval);
+        reservaTemporaria = null;
         socket.emit('liberar_vaga', {evento});
-        modal.style.display = 'none'; // Fecha o modal
+        modal.style.display = 'none';
         alert("Reserva cancelada.");
     };
 }
 
-// Função para adicionar um item na lista de espera
 function adicionarNaFila(userId, tempoEspera) {
     const lista = document.getElementById('queue-list');
 
-    // Cria um novo item para a lista de espera
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
 
-    // Adiciona o ID do usuário e o tempo de espera
     li.innerHTML =
         `<span>Session_${userId}</span>
     <span class="badge bg-warning">${tempoEspera}s</span>
     `;
 
-    // Adiciona o item na lista
     lista.appendChild(li);
 }
 
-// Captura o ID do usuário logado via Socket.IO
 socket.on('user_id', function (data) {
     const userId = data.user_id;
     console.log('ID do usuário logado:', userId);
 
-    // Exemplo de adicionar o usuário logado com tempo de espera de 19s
     adicionarNaFila(userId, 19);
 });
 
-// // Exemplo de adicionar outros usuários na fila
-// adicionarNaFila('7h3k3m', 23);
-// adicionarNaFila('6st8u', 30);
-
-
-// Recebe a atualização dos eventos em tempo real
 socket.on('atualizar_eventos', (events) => {
     atualizarEventos(events);
 });
@@ -179,20 +165,15 @@ socket.on('atualizar_eventos', (events) => {
 //     document.getElementById('user-count').innerText = userCount;
 // });
 
-
-// Ouve a atualização de usuários online
 socket.on('atualizar_usuarios_online', function (userCount) {
-    // Atualiza o contador de usuários no frontend
     const count = userCount.length
     document.getElementById('user-count').innerText = count;
-    document.getElementById('loading').style.display = 'none';  // Oculta o "loading" após a atualização
+    document.getElementById('loading').style.display = 'none';
 });
 
-// Exibe o "loading" enquanto os dados são recuperados
 setInterval(() => {
-    document.getElementById('loading').style.display = 'block'; // Exibe o loading a cada 5 segundos
+    document.getElementById('loading').style.display = 'block';
 }, 1000);
-
 
 function reservar(evento) {
     const userId = prompt("Digite seu ID de usuário:");
@@ -200,3 +181,25 @@ function reservar(evento) {
         socket.emit('reservar', {user_id: userId, evento});
     }
 }
+
+function monitorarTempoFila() {
+    const filaTimer = setInterval(() => {
+        if (reservaTemporaria) {
+            clearInterval(filaTimer);
+            return;
+        }
+
+        tempoFila -= 1;
+        if (tempoFila <= 0) {
+            socket.emit('tempo_fila', { user_id: meuUserId });
+            clearInterval(filaTimer);
+        }
+    }, 1000);
+}
+
+socket.on('atualizar_fila', function (fila) {
+    atualizarUsuariosOnline(fila);
+    if (fila.includes(meuUserId)) {
+        monitorarTempoFila();
+    }
+});
